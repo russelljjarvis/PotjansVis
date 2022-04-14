@@ -1,1 +1,3 @@
+add-apt-repository ppa:nest-simulator/nest
+update
 nest
