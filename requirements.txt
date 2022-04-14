@@ -11,6 +11,4 @@ pyveplot
 seaborn
 click==8
 holoviews
-neuron
 pyNN
-lava-nc-0.1.0.tar.gz
