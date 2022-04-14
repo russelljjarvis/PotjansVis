@@ -221,12 +221,10 @@ def main():
     print("%d Setting up recording in inhibitory population." % rank)
     I_net.sample(Nrec).record('spikes')
     I_net[0:2].record('v')
-
-    #progress_bar = ProgressBar(width=20)
-    connector = FixedProbabilityConnector(epsilon, rng=rng, callback=progress_bar)
+    connector = FixedProbabilityConnector(epsilon, rng=rng)
     E_syn = StaticSynapse(weight=JE, delay=delay)
     I_syn = StaticSynapse(weight=JI, delay=delay)
-    ext_Connector = OneToOneConnector(callback=progress_bar)
+    ext_Connector = OneToOneConnector()
     ext_syn = StaticSynapse(weight=JE, delay=dt)
 
     print("%d Connecting excitatory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JE, delay))
