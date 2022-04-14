@@ -1,8 +1,8 @@
 import streamlit as st
 import potjans_as_network as pan
 import pandas as pd
-from tutorial06_hierarchical_processes import plot_conn_sankey, generate_sankey_figure
-from tutorial06_hierarchical_processes import *
+from net_viz import plot_conn_sankey, generate_sankey_figure
+from net_viz import *
 import network_params_pynn
 import numpy as np
 import elephant
