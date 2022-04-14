@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pyNN.brian2 as sim
 #sim.end()
+from pyNN.random import NumpyRNG, RandomDistribution
+from pyNN.brian2 import *
+
 
 
 
@@ -94,8 +97,6 @@ def main():
         st.pyplot(fig, use_column_width=True)
 
 
-    from pyNN.random import NumpyRNG, RandomDistribution
-    from pyNN.brian2 import *
 
     #timer = Timer()
 
