@@ -11,4 +11,4 @@ pyveplot
 seaborn
 click==8
 holoviews
-git+https://github.com/lava-nc/lava@main
+pyNN
