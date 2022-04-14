@@ -126,7 +126,7 @@ def main():
     theta       = 20.0    # threshold
 
     # simulation-related parameters
-    simtime     = 100.0   # simulation time [ms]
+    simtime     = 2.0   # simulation time [ms]
     dt          = 0.1     # simulation step length [ms]
 
     # seed for random generator used when building connections
@@ -241,7 +241,7 @@ def main():
     I_to_I = Projection(I_net, I_net, connector, I_syn, receptor_type="inhibitory")
     print("I --> I\t\t", len(I_to_I), "connections")
     input_to_I = Projection(inpoisson, I_net, ext_Connector, ext_syn, receptor_type="excitatory")
-    print("input --> I\t", len(input_to_I), "connections")
+    st.text("input --> I\t", len(input_to_I), "connections")
 
     # read out time used for building
     buildCPUTime = timer.elapsedTime()
@@ -249,10 +249,10 @@ def main():
 
     # run, measure computer time
     timer.start()  # start timer on construction
-    print("%d Running simulation for %g ms." % (rank, simtime))
+    st.text("%d Running simulation for %g ms." % (rank, simtime))
     run(simtime)
     simCPUTime = timer.elapsedTime()
-
+    st.text(simCPUTime)
     # write data to file
     print("%d Writing data to file." % rank)
     (E_net + I_net).write_data("Results/brunel_np%d_%s.pkl" % (np, simulator_name))
