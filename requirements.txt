@@ -12,3 +12,4 @@ seaborn
 click==8
 holoviews
 pyNN
+brian2
