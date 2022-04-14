@@ -1,0 +1,14 @@
+lava
+numpy
+xlrd==1.2.0
+plotly==4.5.2
+streamlit==0.80.0
+pyvis==0.1.9
+openpyxl==3.0.0
+scikit-image
+networkx==2.5.1
+pandas
+pyveplot
+seaborn==0.9.1
+click==8
+holoviews
