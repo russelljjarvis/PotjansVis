@@ -12,57 +12,6 @@ import networkx as nx
 import pyNN.brian2 as sim
 sim.setup()
 sim.end()
-def nx_chunk(graph, chunk_size):
-    """
-    Chunk a graph into subgraphs with the specified minimum chunk size.
-
-    Inspired by Lukes algorithm.
-    """
-
-    # convert to a tree;
-    # a balanced spanning tree would be preferable to a minimum spanning tree,
-    # but networkx does not seem to have an implementation of that
-    tree = nx.minimum_spanning_tree(graph)
-
-    # select a root that is maximally far away from all leaves
-    leaves = [node for node, degree in tree.degree() if degree == 1]
-    minimum_distance_to_leaf = {node : tree.size() for node in tree.nodes()}
-    for leaf in leaves:
-        distances = nx.single_source_shortest_path_length(tree, leaf)
-        for node, distance in distances.items():
-            if distance < minimum_distance_to_leaf[node]:
-                minimum_distance_to_leaf[node] = distance
-    root = max(minimum_distance_to_leaf, key=minimum_distance_to_leaf.get)
-
-    # make the tree directed and compute the total descendants of each node
-    tree = nx.dfs_tree(tree, root)
-    total_descendants = get_total_descendants(tree)
-
-    # prune chunks, starting from the leaves
-    chunks = []
-    max_descendants = np.max(list(total_descendants.values()))
-    while (max_descendants + 1 > chunk_size) & (tree.size() >= 2 * chunk_size):
-        for node in list(nx.topological_sort(tree))[::-1]: # i.e. from leaf to root
-            if (total_descendants[node] + 1) >= chunk_size:
-                chunk = list(nx.descendants(tree, node))
-                chunk.append(node)
-                chunks.append(chunk)
-
-                # update relevant data structures
-                tree.remove_nodes_from(chunk)
-                total_descendants = get_total_descendants(tree)
-                max_descendants = np.max(list(total_descendants.values()))
-
-                break
-
-    # handle remainder
-    chunks.append(list(tree.nodes()))
-
-    return chunks
-
-
-def get_total_descendants(dag):
-    return {node : len(nx.descendants(dag, node)) for node in dag.nodes()}
 
 
 
@@ -145,5 +94,184 @@ def main():
         nx.draw(g, node_color=[node_to_color[node] for node in g.nodes()], cmap='tab20', ax=axes)
         st.pyplot(fig, use_column_width=True)
 
+
+    from pyNN.random import NumpyRNG, RandomDistribution
+
+    #timer = Timer()
+
+    # === Define parameters ========================================================
+
+    downscale   = 50      # scale number of neurons down by this factor
+                          # scale synaptic weights up by this factor to
+                          # obtain similar dynamics independent of size
+    order       = 50000  # determines size of network:
+                          # 4*order excitatory neurons
+                          # 1*order inhibitory neurons
+    Nrec        = 50      # number of neurons to record from, per population
+    epsilon     = 0.1     # connectivity: proportion of neurons each neuron projects to
+
+    # Parameters determining model dynamics, cf Brunel (2000), Figs 7, 8 and Table 1
+    # here: Case C, asynchronous irregular firing, ~35 Hz
+    eta         = 2.0     # rel rate of external input
+    g           = 5.0     # rel strength of inhibitory synapses
+    J           = 0.1     # synaptic weight [mV]
+    delay       = 1.5     # synaptic delay, all connections [ms]
+
+    # single neuron parameters
+    tauMem      = 20.0    # neuron membrane time constant [ms]
+    tauSyn      = 0.1     # synaptic time constant [ms]
+    tauRef      = 2.0     # refractory time [ms]
+    U0          = 0.0     # resting potential [mV]
+    theta       = 20.0    # threshold
+
+    # simulation-related parameters
+    simtime     = 100.0   # simulation time [ms]
+    dt          = 0.1     # simulation step length [ms]
+
+    # seed for random generator used when building connections
+    connectseed = 12345789
+    use_RandomArray = True  # use Python rng rather than NEST rng
+
+    # seed for random generator(s) used during simulation
+    kernelseed  = 43210987
+
+    # === Calculate derived parameters =============================================
+
+    # scaling: compute effective order and synaptic strength
+    order_eff = int(float(order)/downscale)
+    J_eff     = J*downscale
+
+    # compute neuron numbers
+    NE = int(4*order_eff)  # number of excitatory neurons
+    NI = int(1*order_eff)  # number of inhibitory neurons
+    N  = NI + NE           # total number of neurons
+
+    # compute synapse numbers
+    CE   = int(epsilon*NE)  # number of excitatory synapses on neuron
+    CI   = int(epsilon*NI)  # number of inhibitory synapses on neuron
+    C    = CE + CI          # total number of internal synapses per n.
+    Cext = CE               # number of external synapses on neuron
+
+    # synaptic weights, scaled for alpha functions, such that
+    # for constant membrane potential, charge J would be deposited
+    fudge = 0.00041363506632638  # ensures dV = J at V=0
+
+    # excitatory weight: JE = J_eff / tauSyn * fudge
+    JE = (J_eff/tauSyn)*fudge
+
+    # inhibitory weight: JI = - g * JE
+    JI = -g*JE
+
+    # threshold, external, and Poisson generator rates:
+    nu_thresh = theta/(J_eff*CE*tauMem)
+    nu_ext    = eta*nu_thresh     # external rate per synapse
+    p_rate    = 1000*nu_ext*Cext  # external input rate per neuron (Hz)
+
+    # number of synapses---just so we know
+    Nsyn = (C+1)*N + 2*Nrec  # number of neurons * (internal synapses + 1 synapse from PoissonGenerator) + 2synapses" to spike detectors
+
+    # put cell parameters into a dict
+    cell_params = {'tau_m'      : tauMem,
+                   'tau_syn_E'  : tauSyn,
+                   'tau_syn_I'  : tauSyn,
+                   'tau_refrac' : tauRef,
+                   'v_rest'     : U0,
+                   'v_reset'    : U0,
+                   'v_thresh'   : theta,
+                   'cm'         : 0.001}     # (nF)
+
+    # === Build the network ========================================================
+
+    # clear all existing network elements and set resolution and limits on delays.
+    # For NEST, limits must be set BEFORE connecting any elements
+
+    #extra = {'threads' : 2}
+    extra = {}
+
+    rank = setup(timestep=dt, max_delay=delay, **extra)
+
+    print("%d Setting up random number generator" % rank)
+    rng = NumpyRNG(kernelseed, parallel_safe=True)
+
+    print("%d Creating excitatory population with %d neurons." % (rank, NE))
+    celltype = IF_curr_alpha(**cell_params)
+    E_net = Population(NE, celltype, label="E_net")
+
+    print("%d Creating inhibitory population with %d neurons." % (rank, NI))
+    I_net = Population(NI, celltype, label="I_net")
+
+    print("%d Initialising membrane potential to random values between %g mV and %g mV." % (rank, U0, theta))
+    uniformDistr = RandomDistribution('uniform', low=U0, high=theta, rng=rng)
+    E_net.initialize(v=uniformDistr)
+    I_net.initialize(v=uniformDistr)
+
+    print("%d Creating excitatory Poisson generator with rate %g spikes/s." % (rank, p_rate))
+    source_type = SpikeSourcePoisson(rate=p_rate)
+    expoisson = Population(NE, source_type, label="expoisson")
+
+    print("%d Creating inhibitory Poisson generator with the same rate." % rank)
+    inpoisson = Population(NI, source_type, label="inpoisson")
+
+    # Record spikes
+    print("%d Setting up recording in excitatory population." % rank)
+    E_net.sample(Nrec).record('spikes')
+    E_net[0:2].record('v')
+
+    print("%d Setting up recording in inhibitory population." % rank)
+    I_net.sample(Nrec).record('spikes')
+    I_net[0:2].record('v')
+
+    progress_bar = ProgressBar(width=20)
+    connector = FixedProbabilityConnector(epsilon, rng=rng, callback=progress_bar)
+    E_syn = StaticSynapse(weight=JE, delay=delay)
+    I_syn = StaticSynapse(weight=JI, delay=delay)
+    ext_Connector = OneToOneConnector(callback=progress_bar)
+    ext_syn = StaticSynapse(weight=JE, delay=dt)
+
+    print("%d Connecting excitatory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JE, delay))
+    E_to_E = Projection(E_net, E_net, connector, E_syn, receptor_type="excitatory")
+    print("E --> E\t\t", len(E_to_E), "connections")
+    I_to_E = Projection(I_net, E_net, connector, I_syn, receptor_type="inhibitory")
+    print("I --> E\t\t", len(I_to_E), "connections")
+    input_to_E = Projection(expoisson, E_net, ext_Connector, ext_syn, receptor_type="excitatory")
+    print("input --> E\t", len(input_to_E), "connections")
+
+    print("%d Connecting inhibitory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JI, delay))
+    E_to_I = Projection(E_net, I_net, connector, E_syn, receptor_type="excitatory")
+    print("E --> I\t\t", len(E_to_I), "connections")
+    I_to_I = Projection(I_net, I_net, connector, I_syn, receptor_type="inhibitory")
+    print("I --> I\t\t", len(I_to_I), "connections")
+    input_to_I = Projection(inpoisson, I_net, ext_Connector, ext_syn, receptor_type="excitatory")
+    print("input --> I\t", len(input_to_I), "connections")
+
+    # read out time used for building
+    buildCPUTime = timer.elapsedTime()
+    # === Run simulation ===========================================================
+
+    # run, measure computer time
+    timer.start()  # start timer on construction
+    print("%d Running simulation for %g ms." % (rank, simtime))
+    run(simtime)
+    simCPUTime = timer.elapsedTime()
+
+    # write data to file
+    print("%d Writing data to file." % rank)
+    (E_net + I_net).write_data("Results/brunel_np%d_%s.pkl" % (np, simulator_name))
+
+    E_rate = E_net.mean_spike_count()*1000.0/simtime
+    I_rate = I_net.mean_spike_count()*1000.0/simtime
+
+    # write a short report
+    nprint("\n--- Brunel Network Simulation ---")
+    nprint("Nodes              : %d" % np)
+    nprint("Number of Neurons  : %d" % N)
+    nprint("Number of Synapses : %d" % Nsyn)
+    nprint("Input firing rate  : %g" % p_rate)
+    nprint("Excitatory weight  : %g" % JE)
+    nprint("Inhibitory weight  : %g" % JI)
+    nprint("Excitatory rate    : %g Hz" % E_rate)
+    nprint("Inhibitory rate    : %g Hz" % I_rate)
+    nprint("Build time         : %g s" % buildCPUTime)
+    nprint("Simulation time    : %g s" % simCPUTime)
 if __name__ == "__main__":
     main()
