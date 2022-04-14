@@ -44,7 +44,7 @@ def main():
         ei_ratio = st.slider('Desired Weight ratio', 0.0, 1.0, 0.01)
 
         ratio,G,weights = pan.set_weight_ratio(pan.enum_node_name,pan.edges,known_ratio=ei_ratio)
-        st.write("Excit Inhib", ei_ratio,ratio)
+        st.text("Excit Inhib", ei_ratio,ratio)
 
         list_of_dicts=[]
         cnt=0
@@ -60,7 +60,7 @@ def main():
 
         ei_ratio = st.slider('Desired Weight ratio', 0.0, 1.0, 0.01)
         ratio,G,weights = pan.set_weight_ratio(pan.enum_node_name,pan.edges,known_ratio=ei_ratio)
-        st.write("Excit Inhib", ei_ratio,ratio)
+        st.text("Excit Inhib", ei_ratio,ratio)
 
         nt = pan.interactive_population(pan.node_name,G,weights,pan.cd)
         nt.save_graph("population.html")
@@ -83,13 +83,13 @@ def main():
         )
         ei_ratio = st.slider('Desired Weight ratio', 0.0, 1.0, 0.01)
         ratio,g,weights = pan.set_weight_ratio(pan.enum_node_name,pan.edges,known_ratio=ei_ratio)
-        st.write("Excit Inhib", ei_ratio,ratio)
+        st.text("Excit Inhib", ei_ratio,ratio)
 
         fig, axes = plt.subplots(1, 1, figsize=(12, 4))
 
         chunks = nx_chunk(g, 4)
         #node_to_color = dict()
-        st.write(len(chunks))
+        st.text(len(chunks))
         for ii, chunk in enumerate(chunks):
             for node in chunk:
                 node_to_color[node] = ii
@@ -191,34 +191,34 @@ def main():
 
     rank = setup(timestep=dt, max_delay=delay, **extra)
 
-    st.write"%d Setting up random number generator" % rank)
+    st.text("%d Setting up random number generator" % rank)
     rng = NumpyRNG(kernelseed, parallel_safe=True)
 
-    st.write("%d Creating excitatory population with %d neurons." % (rank, NE))
+    st.text("%d Creating excitatory population with %d neurons." % (rank, NE))
     celltype = IF_curr_alpha(**cell_params)
     E_net = Population(NE, celltype, label="E_net")
 
-    st.write("%d Creating inhibitory population with %d neurons." % (rank, NI))
+    st.text("%d Creating inhibitory population with %d neurons." % (rank, NI))
     I_net = Population(NI, celltype, label="I_net")
 
-    st.write("%d Initialising membrane potential to random values between %g mV and %g mV." % (rank, U0, theta))
+    st.text("%d Initialising membrane potential to random values between %g mV and %g mV." % (rank, U0, theta))
     uniformDistr = RandomDistribution('uniform', low=U0, high=theta, rng=rng)
     E_net.initialize(v=uniformDistr)
     I_net.initialize(v=uniformDistr)
 
-    st.write("%d Creating excitatory Poisson generator with rate %g spikes/s." % (rank, p_rate))
+    st.text("%d Creating excitatory Poisson generator with rate %g spikes/s." % (rank, p_rate))
     source_type = SpikeSourcePoisson(rate=p_rate)
     expoisson = Population(NE, source_type, label="expoisson")
 
-    st.write("%d Creating inhibitory Poisson generator with the same rate." % rank)
+    st.text("%d Creating inhibitory Poisson generator with the same rate." % rank)
     inpoisson = Population(NI, source_type, label="inpoisson")
 
     # Record spikes
-    st.write("%d Setting up recording in excitatory population." % rank)
+    st.text("%d Setting up recording in excitatory population." % rank)
     E_net.sample(Nrec).record('spikes')
     #E_net[0:2].record('v')
 
-    st.write("%d Setting up recording in inhibitory population." % rank)
+    st.text("%d Setting up recording in inhibitory population." % rank)
     I_net.sample(Nrec).record('spikes')
     #I_net[0:2].record('v')
     connector = FixedProbabilityConnector(epsilon, rng=rng)
@@ -229,17 +229,17 @@ def main():
 
     st.text("%d Connecting excitatory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JE, delay))
     E_to_E = Projection(E_net, E_net, connector, E_syn, receptor_type="excitatory")
-    st.write("E --> E\t\t", len(E_to_E), "connections")
+    st.text("E --> E\t\t", len(E_to_E), "connections")
     I_to_E = Projection(I_net, E_net, connector, I_syn, receptor_type="inhibitory")
-    st.write("I --> E\t\t", len(I_to_E), "connections")
+    st.text("I --> E\t\t", len(I_to_E), "connections")
     input_to_E = Projection(expoisson, E_net, ext_Connector, ext_syn, receptor_type="excitatory")
-    st.write("input --> E\t", len(input_to_E), "connections")
+    st.text("input --> E\t", len(input_to_E), "connections")
 
-    st.write("%d Connecting inhibitory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JI, delay))
+    st.text("%d Connecting inhibitory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JI, delay))
     E_to_I = Projection(E_net, I_net, connector, E_syn, receptor_type="excitatory")
-    st.write("E --> I\t\t", len(E_to_I), "connections")
+    st.text("E --> I\t\t", len(E_to_I), "connections")
     I_to_I = Projection(I_net, I_net, connector, I_syn, receptor_type="inhibitory")
-    st.write("I --> I\t\t", len(I_to_I), "connections")
+    st.text("I --> I\t\t", len(I_to_I), "connections")
     input_to_I = Projection(inpoisson, I_net, ext_Connector, ext_syn, receptor_type="excitatory")
     st.text("input --> I\t", len(input_to_I), "connections")
 
@@ -254,23 +254,23 @@ def main():
     simCPUTime = timer.elapsedTime()
     st.text(simCPUTime)
     # write data to file
-    st.write("%d Writing data to file." % rank)
+    st.text("%d Writing data to file." % rank)
     (E_net + I_net).write_data("Results/brunel_np%d_%s.pkl" % (np, simulator_name))
 
     E_rate = E_net.mean_spike_count()*1000.0/simtime
     I_rate = I_net.mean_spike_count()*1000.0/simtime
 
     # write a short report
-    nst.write("\n--- Brunel Network Simulation ---")
-    nst.write("Nodes              : %d" % np)
-    nst.write("Number of Neurons  : %d" % N)
-    nst.write("Number of Synapses : %d" % Nsyn)
-    nst.write("Input firing rate  : %g" % p_rate)
-    nst.write("Excitatory weight  : %g" % JE)
-    nst.write("Inhibitory weight  : %g" % JI)
-    nst.write("Excitatory rate    : %g Hz" % E_rate)
-    nst.write("Inhibitory rate    : %g Hz" % I_rate)
-    nst.write("Build time         : %g s" % buildCPUTime)
+    nst.text("\n--- Brunel Network Simulation ---")
+    nst.text("Nodes              : %d" % np)
+    nst.text("Number of Neurons  : %d" % N)
+    nst.text("Number of Synapses : %d" % Nsyn)
+    nst.text("Input firing rate  : %g" % p_rate)
+    nst.text("Excitatory weight  : %g" % JE)
+    nst.text("Inhibitory weight  : %g" % JI)
+    nst.text("Excitatory rate    : %g Hz" % E_rate)
+    nst.text("Inhibitory rate    : %g Hz" % I_rate)
+    nst.text("Build time         : %g s" % buildCPUTime)
     st.text("Simulation time    : %g s" % simCPUTime)
 
 if __name__ == "__main__":
