@@ -229,19 +229,19 @@ def main():
 
     st.text("%d Connecting excitatory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JE, delay))
     E_to_E = Projection(E_net, E_net, connector, E_syn, receptor_type="excitatory")
-    st.text("E --> E\t\t", len(E_to_E), "connections")
+    #st.text("E --> E\t\t", len(E_to_E), "connections")
     I_to_E = Projection(I_net, E_net, connector, I_syn, receptor_type="inhibitory")
-    st.text("I --> E\t\t", len(I_to_E), "connections")
+    #st.text("I --> E\t\t", len(I_to_E), "connections")
     input_to_E = Projection(expoisson, E_net, ext_Connector, ext_syn, receptor_type="excitatory")
-    st.text("input --> E\t", len(input_to_E), "connections")
+    #st.text("input --> E\t", len(input_to_E), "connections")
 
     st.text("%d Connecting inhibitory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JI, delay))
     E_to_I = Projection(E_net, I_net, connector, E_syn, receptor_type="excitatory")
-    st.text("E --> I\t\t", len(E_to_I), "connections")
+    #st.text("E --> I\t\t", len(E_to_I), "connections")
     I_to_I = Projection(I_net, I_net, connector, I_syn, receptor_type="inhibitory")
-    st.text("I --> I\t\t", len(I_to_I), "connections")
+    #st.text("I --> I\t\t", len(I_to_I), "connections")
     input_to_I = Projection(inpoisson, I_net, ext_Connector, ext_syn, receptor_type="excitatory")
-    st.text("input --> I\t", len(input_to_I), "connections")
+    #st.text("input --> I\t", len(input_to_I), "connections")
 
     # read out time used for building
     buildCPUTime = timer.elapsedTime()
