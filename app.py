@@ -9,7 +9,7 @@ import elephant
 import streamlit.components.v1 as components
 import matplotlib.pyplot as plt
 import networkx as nx
-import pyNN.nest as sim
+import pyNN.neuron as sim
 sim.setup()
 sim.end()
 def nx_chunk(graph, chunk_size):

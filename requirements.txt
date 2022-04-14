@@ -11,4 +11,5 @@ pyveplot
 seaborn
 click==8
 holoviews
+neuron
 pyNN
