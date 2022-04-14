@@ -222,7 +222,7 @@ def main():
     I_net.sample(Nrec).record('spikes')
     I_net[0:2].record('v')
 
-    progress_bar = ProgressBar(width=20)
+    #progress_bar = ProgressBar(width=20)
     connector = FixedProbabilityConnector(epsilon, rng=rng, callback=progress_bar)
     E_syn = StaticSynapse(weight=JE, delay=delay)
     I_syn = StaticSynapse(weight=JI, delay=delay)
