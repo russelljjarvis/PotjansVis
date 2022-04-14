@@ -244,34 +244,34 @@ def main():
     #st.text("input --> I\t", len(input_to_I), "connections")
 
     # read out time used for building
-    buildCPUTime = timer.elapsedTime()
+    #buildCPUTime = timer.elapsedTime()
     # === Run simulation ===========================================================
 
     # run, measure computer time
-    timer.start()  # start timer on construction
+    #timer.start()  # start timer on construction
     st.text("%d Running simulation for %g ms." % (rank, simtime))
     run(simtime)
-    simCPUTime = timer.elapsedTime()
-    st.text(simCPUTime)
+    #simCPUTime = timer.elapsedTime()
+    #st.text(simCPUTime)
     # write data to file
-    st.text("%d Writing data to file." % rank)
+    #st.text("%d Writing data to file." % rank)
     (E_net + I_net).write_data("Results/brunel_np%d_%s.pkl" % (np, simulator_name))
 
     E_rate = E_net.mean_spike_count()*1000.0/simtime
     I_rate = I_net.mean_spike_count()*1000.0/simtime
 
     # write a short report
-    nst.text("\n--- Brunel Network Simulation ---")
-    nst.text("Nodes              : %d" % np)
-    nst.text("Number of Neurons  : %d" % N)
-    nst.text("Number of Synapses : %d" % Nsyn)
-    nst.text("Input firing rate  : %g" % p_rate)
-    nst.text("Excitatory weight  : %g" % JE)
-    nst.text("Inhibitory weight  : %g" % JI)
-    nst.text("Excitatory rate    : %g Hz" % E_rate)
-    nst.text("Inhibitory rate    : %g Hz" % I_rate)
-    nst.text("Build time         : %g s" % buildCPUTime)
-    st.text("Simulation time    : %g s" % simCPUTime)
+    st.text("\n--- Brunel Network Simulation ---")
+    st.text("Nodes              : %d" % np)
+    st.text("Number of Neurons  : %d" % N)
+    st.text("Number of Synapses : %d" % Nsyn)
+    st.text("Input firing rate  : %g" % p_rate)
+    st.text("Excitatory weight  : %g" % JE)
+    st.text("Inhibitory weight  : %g" % JI)
+    st.text("Excitatory rate    : %g Hz" % E_rate)
+    st.text("Inhibitory rate    : %g Hz" % I_rate)
+    #st.text("Build time         : %g s" % buildCPUTime)
+    #st.text("Simulation time    : %g s" % simCPUTime)
 
 if __name__ == "__main__":
     main()
