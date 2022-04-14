@@ -44,7 +44,7 @@ def main():
         ei_ratio = st.slider('Desired Weight ratio', 0.0, 1.0, 0.01)
 
         ratio,G,weights = pan.set_weight_ratio(pan.enum_node_name,pan.edges,known_ratio=ei_ratio)
-        st.text("Excit Inhib", ei_ratio,ratio)
+        st.write("Excit Inhib", ei_ratio,ratio)
 
         list_of_dicts=[]
         cnt=0
