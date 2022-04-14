@@ -1,7 +1,5 @@
-git+https://github.com/lava-nc/lava@main
 elephant
 numpy
-xlrd==1.2.0
 plotly
 dicthash
 streamlit
@@ -13,3 +11,4 @@ pyveplot
 seaborn
 click==8
 holoviews
+git+https://github.com/lava-nc/lava@main
