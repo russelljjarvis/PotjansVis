@@ -255,7 +255,7 @@ def main():
     #st.text(simCPUTime)
     # write data to file
     #st.text("%d Writing data to file." % rank)
-    (E_net + I_net).write_data("Results/brunel_np%d_%s.pkl" % (np, simulator_name))
+    #(E_net + I_net).write_data("Results/brunel_np%d_%s.pkl" % (np, simulator_name))
 
     E_rate = E_net.mean_spike_count()*1000.0/simtime
     I_rate = I_net.mean_spike_count()*1000.0/simtime
