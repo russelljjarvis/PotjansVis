@@ -105,10 +105,10 @@ def main():
     downscale   = 50      # scale number of neurons down by this factor
                           # scale synaptic weights up by this factor to
                           # obtain similar dynamics independent of size
-    order       = 50  # determines size of network:
+    order       = 500  # determines size of network:
                           # 4*order excitatory neurons
                           # 1*order inhibitory neurons
-    Nrec        = 50      # number of neurons to record from, per population
+    Nrec        = 10      # number of neurons to record from, per population
     epsilon     = 0.1     # connectivity: proportion of neurons each neuron projects to
 
     # Parameters determining model dynamics, cf Brunel (2000), Figs 7, 8 and Table 1
