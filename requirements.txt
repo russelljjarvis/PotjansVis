@@ -1,7 +1,8 @@
 lava
 numpy
 xlrd==1.2.0
-plotl
+plotly
+dicthash
 streamlit
 pyvis
 scikit-image
