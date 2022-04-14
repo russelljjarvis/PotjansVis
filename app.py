@@ -10,8 +10,7 @@ import streamlit.components.v1 as components
 import matplotlib.pyplot as plt
 import networkx as nx
 import pyNN.brian2 as sim
-sim.setup()
-sim.end()
+#sim.end()
 
 
 
@@ -96,6 +95,7 @@ def main():
 
 
     from pyNN.random import NumpyRNG, RandomDistribution
+    from pyNN.brian2 import *
 
     #timer = Timer()
 
@@ -273,5 +273,6 @@ def main():
     nprint("Inhibitory rate    : %g Hz" % I_rate)
     nprint("Build time         : %g s" % buildCPUTime)
     nprint("Simulation time    : %g s" % simCPUTime)
+
 if __name__ == "__main__":
     main()
