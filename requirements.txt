@@ -1,4 +1,4 @@
-lava
+git+https://github.com/lava-nc/lava@main
 elephant
 numpy
 xlrd==1.2.0
