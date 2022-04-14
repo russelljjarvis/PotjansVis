@@ -105,7 +105,7 @@ def main():
     downscale   = 50      # scale number of neurons down by this factor
                           # scale synaptic weights up by this factor to
                           # obtain similar dynamics independent of size
-    order       = 50000  # determines size of network:
+    order       = 50  # determines size of network:
                           # 4*order excitatory neurons
                           # 1*order inhibitory neurons
     Nrec        = 50      # number of neurons to record from, per population
@@ -126,7 +126,7 @@ def main():
     theta       = 20.0    # threshold
 
     # simulation-related parameters
-    simtime     = 2.0   # simulation time [ms]
+    simtime     = 1.0   # simulation time [ms]
     dt          = 0.1     # simulation step length [ms]
 
     # seed for random generator used when building connections
@@ -216,18 +216,18 @@ def main():
     # Record spikes
     print("%d Setting up recording in excitatory population." % rank)
     E_net.sample(Nrec).record('spikes')
-    E_net[0:2].record('v')
+    #E_net[0:2].record('v')
 
     print("%d Setting up recording in inhibitory population." % rank)
     I_net.sample(Nrec).record('spikes')
-    I_net[0:2].record('v')
+    #I_net[0:2].record('v')
     connector = FixedProbabilityConnector(epsilon, rng=rng)
     E_syn = StaticSynapse(weight=JE, delay=delay)
     I_syn = StaticSynapse(weight=JI, delay=delay)
     ext_Connector = OneToOneConnector()
     ext_syn = StaticSynapse(weight=JE, delay=dt)
 
-    print("%d Connecting excitatory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JE, delay))
+    st.text("%d Connecting excitatory population with connection probability %g, weight %g nA and delay %g ms." % (rank, epsilon, JE, delay))
     E_to_E = Projection(E_net, E_net, connector, E_syn, receptor_type="excitatory")
     print("E --> E\t\t", len(E_to_E), "connections")
     I_to_E = Projection(I_net, E_net, connector, I_syn, receptor_type="inhibitory")
@@ -271,7 +271,7 @@ def main():
     nprint("Excitatory rate    : %g Hz" % E_rate)
     nprint("Inhibitory rate    : %g Hz" % I_rate)
     nprint("Build time         : %g s" % buildCPUTime)
-    nprint("Simulation time    : %g s" % simCPUTime)
+    st.text("Simulation time    : %g s" % simCPUTime)
 
 if __name__ == "__main__":
     main()
