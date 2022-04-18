@@ -4,9 +4,10 @@
 from pyvis.network import Network
 from dicthash import dicthash
 import network_params_pynn
+nodes = network_params_pynn.N_full.keys()
+
 import numpy as np
 import networkx as nx
-nodes = network_params_pynn.N_full.keys()
 def interactive_population(sizes, popg, weights,color_dict):
 
 
@@ -14,8 +15,11 @@ def interactive_population(sizes, popg, weights,color_dict):
     edge_colors = []
     for e in popg.edges:
         edge_colors.append(color_dict[e[0]])
+    if type(sizes) is type({}):
+        temp = list([s * 1000 for s in sizes.values()])
+    else:
+        temp = list([s * 1000 for s in sizes])
 
-    temp = list([s * 1000 for s in sizes.values()])
     widths = []
     edge_list = []
     edge_colors = []
@@ -25,7 +29,7 @@ def interactive_population(sizes, popg, weights,color_dict):
     for node in popg.nodes():
         # set the node name as the key and the label as its value
         labels[node] = node
-    nt = Network("700px", "700px",directed=True,notebook=True)  # ,layout=physics_layouts)
+    nt = Network("700px", "700px",directed=True)#,notebook=True)  # ,layout=physics_layouts)
 
     nt.barnes_hut()
     for node in popg.nodes:
@@ -42,12 +46,12 @@ def interactive_population(sizes, popg, weights,color_dict):
         cnt+=1
 
     for i,node in enumerate(nt.nodes):
-        node["size"] = sizes[node["id"]]/700 #* 1025
+        node["size"] = sizes[node["id"]]#/70 #* 1025
         node["color"] = cd[node["id"]]
 
     for node in nt.nodes:
         node["title"] = (
-            "<br> {0}'s' group size is: {1}<br>".format(node["id"],sizes[node["id"]])
+            "<h1> {0}'s' group size is: {1} </h1>".format(node["id"],sizes[node["id"]])
         )
 
     nt.save_graph("population.html")
@@ -95,7 +99,7 @@ edges = [[0.1009,  0.1689, 0.0437, 0.0818, 0.0323, 0.,     0.0076, 0.    ],
 
 
 
-def set_weight_ratio(enum_node_name,edges,known_ratio):
+def set_weight_ratio(enum_node_name,edges,el,il):#,ennodes,innodes):
     weights = []
     Iwtotal=[]
     Ewtotal=[]
@@ -106,19 +110,16 @@ def set_weight_ratio(enum_node_name,edges,known_ratio):
             weight=edges[k_][k]
 
             if "I" in v_:
-                weight = weight*(1.0+known_ratio)
-                print("I",weight)
+                weight = weight*il
                 G.add_edge(v,v_,w=weight)
                 Iwtotal.append(weight)
             if "E" in v_:
-                weight = weight*(1.0-known_ratio)
-                print("E",weight)
-
+                weight = np.abs(weight*el)
                 G.add_edge(v,v_,w=weight)
                 Ewtotal.append(weight)
 
             weights.append(weight)
 
-    ratio = sum(Ewtotal)/sum(Iwtotal)
-    return ratio,G,weights
+    #ratio = sum(Ewtotal)/sum(Iwtotal)
+    return G,weights
 #G.ratio

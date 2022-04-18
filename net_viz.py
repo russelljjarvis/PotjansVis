@@ -48,11 +48,12 @@ def compute_cv(spikes_population):
         train_of_trains.extend(spike_train)
     return elephant.statistics.cv(train_of_trains, axis=0, nan_policy='propagate')
 
+import plotly.graph_objects as go
+
 #@st.cache
 def generate_sankey_figure(
     nodes_list, edges_df, title = "neural connectivity"
 ):
-    import plotly.graph_objects as go
 
 
     edges_df["src"] = edges_df["src"].apply(lambda x: nodes_list.index(x))
@@ -72,7 +73,7 @@ def generate_sankey_figure(
         ),
     )
 
-    layout = dict(title='Layered Network Connectivity', font=dict(size=50))
+    layout = dict(title='Layered Network Connectivity', font=dict(size=35))
     fig = go.Figure(data=[data], layout=layout)
     fig.update_layout(
         autosize=False,
