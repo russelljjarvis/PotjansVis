@@ -11,15 +11,9 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-#from verbatim_formal_pynn import *
-# import logging # TODO! Remove if it runs without this line
-#import pyNN
-#import pyNN.brian2 as sim
-#from pyNN.random import NumpyRNG, RandomDistribution
-#from pyNN.brian2 import *
-
 
 def main():
+    st.title("Adjustable Network Connectivity of Potjans et al Model")
     genre = st.sidebar.radio(
         "Choose Graph Layout/Option:",
         (
