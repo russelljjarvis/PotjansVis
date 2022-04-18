@@ -15,10 +15,10 @@ def interactive_population(sizes, popg, weights,color_dict):
     edge_colors = []
     for e in popg.edges:
         edge_colors.append(color_dict[e[0]])
-    if type(sizes) is type({}):
-        temp = list([s * 1000 for s in sizes.values()])
-    else:
-        temp = list([s * 1000 for s in sizes])
+    #if type(sizes) is type({}):
+    #    temp = list([s * 2000 for s in sizes.values()])
+    #else:
+    #    temp = list([s * 5000 for s in sizes])
 
     widths = []
     edge_list = []
@@ -29,7 +29,7 @@ def interactive_population(sizes, popg, weights,color_dict):
     for node in popg.nodes():
         # set the node name as the key and the label as its value
         labels[node] = node
-    nt = Network("700px", "700px",directed=True)#,notebook=True)  # ,layout=physics_layouts)
+    nt = Network("500px", "500px",directed=True)#,notebook=True)  # ,layout=physics_layouts)
 
     nt.barnes_hut()
     for node in popg.nodes:
@@ -42,11 +42,11 @@ def interactive_population(sizes, popg, weights,color_dict):
         src = str(src)
         dst = str(dst)
         ee = popg.get_edge_data(e[0], e[1])
-        nt.add_edge(src, dst, width=weights[cnt]*100)
+        nt.add_edge(src, dst, width=weights[cnt]*75)
         cnt+=1
 
     for i,node in enumerate(nt.nodes):
-        node["size"] = sizes[node["id"]]#/70 #* 1025
+        node["size"] = sizes[node["id"]]*1.75#/70 #* 1025
         node["color"] = cd[node["id"]]
 
     for node in nt.nodes:
@@ -109,11 +109,11 @@ def set_weight_ratio(enum_node_name,edges,el,il):#,ennodes,innodes):
         for k_,v_ in enum_node_name.items():
             weight=edges[k_][k]
 
-            if "I" in v_:
+            if "I" in v:
                 weight = weight*il
                 G.add_edge(v,v_,w=weight)
                 Iwtotal.append(weight)
-            if "E" in v_:
+            if "E" in v:
                 weight = np.abs(weight*el)
                 G.add_edge(v,v_,w=weight)
                 Ewtotal.append(weight)

@@ -1,8 +1,9 @@
 
+import plotly.graph_objects as go
+import pandas as pd
+import plotly.graph_objects as go
 
 def plot_conn_sankey(conv_kernel,ncells):
-    import plotly.graph_objects as go
-    import pandas as pd
     edges_df=[]
     for y,i in enumerate(conv_kernel.weights.init):
         for x,j in enumerate(i):
@@ -48,7 +49,6 @@ def compute_cv(spikes_population):
         train_of_trains.extend(spike_train)
     return elephant.statistics.cv(train_of_trains, axis=0, nan_policy='propagate')
 
-import plotly.graph_objects as go
 
 #@st.cache
 def generate_sankey_figure(
