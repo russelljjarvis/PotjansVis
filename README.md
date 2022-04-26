@@ -1,6 +1,6 @@
 # Mock up Large scale Network Visualization tools.
 
-![Live deployed version of this app](https://share.streamlit.io/russelljjarvis/potjansvis/main/app.py)
+[A Live deployed version of this app](https://share.streamlit.io/russelljjarvis/potjansvis/main/app.py)
 
 
 To run install locally:
